@@ -1,0 +1,1527 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#080b12">
+<title>Kimchi Local AI</title>
+<style>
+:root {
+  color-scheme:dark;
+  --bg:#080b12;--panel:#101622;--panel2:#151e2c;
+  --line:#263348;--text:#edf3ff;--muted:#8493aa;
+  --cyan:#62e6f5;--blue:#648cff;--green:#55e6a5;
+  --red:#ff667d;--purple:#b99aff;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;
+min-height:100vh}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+button:disabled{opacity:.4;cursor:not-allowed}
+.app{max-width:1500px;margin:auto;min-height:100vh;padding:18px}
+header{display:flex;align-items:center;justify-content:space-between;
+gap:15px;padding:10px 4px 20px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:43px;height:43px;border-radius:13px;
+display:grid;place-items:center;background:linear-gradient(135deg,#56e6f5,#7285ff);
+color:#06101a;font-weight:950;font-size:22px}
+.brand h1{font-size:21px;letter-spacing:3px;margin:0}
+.brand small{color:var(--muted);font-size:11px;letter-spacing:1.5px}
+.status{display:flex;align-items:center;gap:8px;color:var(--green);font-size:12px}
+.dot{width:8px;height:8px;background:var(--green);border-radius:50%;
+box-shadow:0 0 12px var(--green)}
+.layout{display:grid;grid-template-columns:350px minmax(0,1fr);
+gap:17px;padding-top:17px}
+.panel{background:var(--panel);border:1px solid var(--line);
+border-radius:16px;overflow:hidden}
+.panel-head{padding:15px 17px;border-bottom:1px solid var(--line);
+display:flex;align-items:center;justify-content:space-between}
+.panel-head h2{font-size:13px;letter-spacing:1.5px;margin:0}
+.muted{color:var(--muted)}
+.small{font-size:11px}
+.models{padding:12px;display:grid;gap:9px;max-height:54vh;overflow:auto}
+.model{border:1px solid var(--line);background:#0c121d;
+border-radius:12px;padding:12px}
+.model-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.model-name{font-size:13px;font-weight:750;line-height:1.5}
+.model-id{font-size:10px;color:var(--muted);overflow-wrap:anywhere;margin-top:4px}
+.model-actions{display:flex;align-items:center;gap:8px;margin-top:11px}
+.model-actions button{flex:1}
+.tag{font-size:9px;font-weight:900;letter-spacing:.7px;
+padding:4px 7px;border-radius:6px;white-space:nowrap}
+.tag-perf{background:#342716;color:#ffc66d;border:1px solid #79572d}
+.tag-ready{background:#12352b;color:var(--green)}
+.tag-unavailable{background:#35202a;color:#ff91a3}
+.tag-loading{background:#172c40;color:var(--cyan)}
+.progress{height:4px;background:#253044;border-radius:5px;margin-top:10px;overflow:hidden}
+.progress span{display:block;height:100%;width:0;background:var(--cyan);
+transition:width .2s}
+.btn{border:1px solid var(--line);border-radius:9px;padding:9px 12px;
+background:var(--panel2);color:var(--text);font-size:12px;font-weight:700}
+.btn.primary{background:linear-gradient(120deg,#54dced,#788dff);
+color:#06101a;border:0}
+.btn.danger{color:#ff8498;border-color:#693341}
+.btn.ghost{background:transparent}
+.btn.tiny{padding:6px 9px;font-size:11px}
+.sidebar-bottom{padding:13px;border-top:1px solid var(--line)}
+.info{font-size:11px;color:var(--muted);line-height:1.6}
+.chat-panel{min-height:78vh;display:flex;flex-direction:column}
+.toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+select{background:#0b111c;color:var(--text);border:1px solid var(--line);
+border-radius:9px;padding:9px;font-size:12px}
+.chat{padding:20px;flex:1;overflow:auto;min-height:390px;max-height:65vh}
+.welcome{text-align:center;max-width:540px;margin:75px auto;color:var(--muted)}
+.welcome h2{color:var(--text);font-size:25px;letter-spacing:2px}
+.welcome p{font-size:13px;line-height:1.7}
+.message{margin:0 0 18px;display:flex;gap:10px;align-items:flex-start}
+.avatar{width:29px;height:29px;flex:0 0 29px;border-radius:9px;
+display:grid;place-items:center;background:#1b2b42;color:var(--cyan);
+font-size:11px;font-weight:900}
+.message.user .avatar{background:#25334e;color:#fff}
+.bubble{min-width:0;max-width:900px;flex:1}
+.msg-head{font-size:11px;color:var(--muted);margin-bottom:6px}
+.msg-body{font-size:13px;line-height:1.75;white-space:pre-wrap;
+overflow-wrap:anywhere}
+.composer{padding:14px;border-top:1px solid var(--line)}
+textarea{width:100%;min-height:75px;max-height:190px;resize:vertical;
+background:#0b111c;color:var(--text);border:1px solid var(--line);
+border-radius:12px;padding:13px;outline:none;font-size:14px;line-height:1.5}
+textarea:focus{border-color:var(--cyan)}
+.composer-bottom{display:flex;align-items:center;justify-content:space-between;
+gap:10px;margin-top:10px}
+.composer-bottom small{font-size:10px;color:var(--muted)}
+.actions{display:flex;gap:8px}
+.metrics{display:flex;gap:15px;flex-wrap:wrap;padding:10px 17px;
+border-top:1px solid var(--line);font-size:10px;color:var(--muted)}
+.metric strong{color:var(--cyan);font-weight:800}
+.history-list{padding:10px;display:grid;gap:7px;max-height:210px;overflow:auto}
+.history-item{display:flex;align-items:center;gap:7px}
+.history-item button:first-child{flex:1;text-align:left;overflow:hidden;
+text-overflow:ellipsis;white-space:nowrap}
+.history-item button{min-width:0}
+.mode-note{font-size:10px;color:var(--muted);line-height:1.5}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+background:#1c2a3b;border:1px solid #40536e;padding:11px 16px;
+border-radius:10px;font-size:12px;z-index:10;display:none;max-width:90vw}
+@media(max-width:850px){
+ .app{padding:10px}.layout{grid-template-columns:1fr}
+ .models{max-height:380px}.chat-panel{min-height:65vh}
+ .chat{min-height:340px;max-height:none;padding:14px}
+ header{padding-bottom:14px}.brand h1{font-size:18px}
+}
+@media(max-width:430px){
+ .app{padding:8px}.toolbar{width:100%}.toolbar select{flex:1;min-width:0}
+ .composer{padding:10px}.composer-bottom{align-items:flex-end}
+ .composer-bottom small{max-width:160px}
+ .btn{padding:10px}.welcome{margin:45px auto}
+}
+
+/* MotionBGs-inspired live wallpaper layer */
+#wallpaperLayer{position:fixed;inset:0;z-index:0;overflow:hidden;background:#070b12;pointer-events:none}
+#wallpaperVideo,#wallpaperImage{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
+#wallpaperScrim{position:absolute;inset:0;background:rgba(10,12,18,.46);transition:background .2s}
+.app{position:relative;z-index:1;backdrop-filter:none}
+.panel{background:rgba(14,21,33,.72);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);border-color:rgba(190,215,255,.16);box-shadow:0 12px 40px rgba(0,0,0,.16)}
+header{border-bottom-color:rgba(190,215,255,.18)}
+.model{background:rgba(8,14,24,.68)}
+textarea,select,.btn{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+textarea{background:rgba(7,13,23,.72);border-color:rgba(190,215,255,.2)}
+.glass-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+#wallpaperDrawer{position:fixed;z-index:30;right:12px;top:72px;width:min(360px,calc(100vw - 24px));max-height:78vh;overflow:auto;padding:14px;border:1px solid rgba(210,225,255,.22);border-radius:17px;background:rgba(12,18,29,.88);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 20px 70px rgba(0,0,0,.45);display:none}
+#wallpaperDrawer.open{display:block}
+#wallpaperDrawer label{display:block;font-size:11px;color:var(--muted);margin:12px 0 5px}
+#wallpaperDrawer input[type=url],#wallpaperDrawer input[type=text]{width:100%;padding:10px;border-radius:9px;border:1px solid var(--line);background:#0b111c;color:var(--text)}
+.drawer-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.drawer-row>*{flex:1;min-width:0}
+#lockscreen{position:fixed;inset:0;z-index:25;display:none;align-items:center;justify-content:center;text-align:center;padding:24px;background:rgba(5,9,16,.14);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+#lockscreen.open{display:flex}
+.lock-clock{font-size:clamp(64px,17vw,112px);font-weight:250;letter-spacing:-5px;text-shadow:0 4px 35px #0008}
+.lock-date{font-size:17px;margin:4px 0 24px;text-shadow:0 2px 15px #000}
+.lock-card{display:inline-block;padding:14px 20px;border-radius:18px;background:rgba(10,16,27,.52);border:1px solid #ffffff35;backdrop-filter:blur(16px)}
+body.locked .app{filter:blur(8px);opacity:.13;pointer-events:none}
+@media(max-width:600px){#wallpaperDrawer{top:62px}.glass-actions .btn{padding:8px 9px}.brand small{letter-spacing:.7px}}
+@media(prefers-reduced-motion:reduce){#wallpaperVideo{display:none!important}}
+
+
+/* Gemini-inspired mobile-first conversational workspace */
+:root{--bg:#10131b;--text:#f3f4f8;--muted:#a6adbb;--line:rgba(255,255,255,.12);--panel:rgba(25,29,39,.64);--panel2:rgba(38,43,55,.72);--accent:#a9c7ff;--green:#78e0b0}
+html,body{width:100%;min-height:100%;height:100%;overscroll-behavior:none}
+body{background:#10131b;font-size:14px}
+.app{max-width:1040px;height:100dvh;min-height:100dvh;margin:0 auto;padding:env(safe-area-inset-top) 18px env(safe-area-inset-bottom);display:flex;flex-direction:column}
+header{flex:0 0 auto;min-height:64px;padding:9px 2px 12px;gap:10px;border-bottom:1px solid rgba(255,255,255,.10)}
+.brand{gap:10px}.logo{width:35px;height:35px;border-radius:50%;font-size:18px;background:linear-gradient(145deg,#b8d0ff,#9e9be8)}
+.brand h1{font-size:16px;letter-spacing:1.4px}.brand small{font-size:9px;letter-spacing:.8px;color:#aeb6c6}
+.glass-actions{justify-content:flex-end;gap:6px}.glass-actions .btn{border-radius:999px;padding:8px 11px;font-size:10px;white-space:nowrap}
+#modelsButton{border-color:rgba(185,205,255,.28);background:rgba(80,101,145,.22);max-width:190px;overflow:hidden;text-overflow:ellipsis}
+.status{font-size:10px;white-space:nowrap}.dot{width:6px;height:6px}
+.layout{display:block;flex:1;min-height:0;padding:0}
+.layout>aside{position:fixed;z-index:31;left:0;top:0;bottom:0;width:min(390px,90vw);padding:calc(env(safe-area-inset-top) + 14px) 12px calc(env(safe-area-inset-bottom) + 14px);overflow-y:auto;background:rgba(17,21,30,.96);border-right:1px solid rgba(255,255,255,.14);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);transform:translateX(-105%);transition:transform .24s ease;box-shadow:20px 0 70px #0007}
+.layout>aside.open{transform:translateX(0)}
+#drawerScrim{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.48);display:none;touch-action:manipulation}
+#drawerScrim.open{display:block}
+#modelDrawerHeader{display:flex;align-items:center;justify-content:space-between;padding:2px 3px 14px;color:#f3f4f8;font-size:13px;letter-spacing:.7px}
+#modelDrawerHeader .btn{border-radius:999px}
+.layout>aside .panel{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.10);border-radius:18px;box-shadow:none}
+.layout>aside .panel-head{padding:12px 14px;border-bottom-color:rgba(255,255,255,.09)}
+.layout>aside .panel-head h2{font-size:11px;letter-spacing:1px}
+.models{padding:4px 12px;gap:0;max-height:48vh}
+.model{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:3px 8px;padding:11px 2px;border:0;border-bottom:1px solid rgba(255,255,255,.08);border-radius:0;background:transparent}
+.model-top{display:contents}.model-name{font-size:13px;font-weight:650}.model-top>div:last-child{justify-self:end}.model-id{grid-column:1/-1;font-size:9px;color:#a3adbf;margin:0;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.model-actions{grid-column:1/-1;margin-top:5px;gap:7px}.model-actions button{flex:0 0 auto;border-radius:999px;padding:6px 11px}.model-actions input{display:none}
+.tag{font-size:8px;border-radius:999px}.progress{grid-column:1/-1;margin-top:5px}
+.sidebar-bottom{padding:12px;border-top-color:rgba(255,255,255,.08)}
+.layout>aside>section+section{margin-top:12px!important}
+.chat-panel{width:min(100%,850px);height:100%;min-height:0;margin:0 auto;border:0;border-radius:0;background:transparent;box-shadow:none;display:flex;flex-direction:column;overflow:visible}
+.chat-panel>.panel-head:first-child{flex:0 0 auto;padding:12px 3px 8px;border:0;min-height:42px}
+.chat-panel>.panel-head:first-child h2{display:none}
+.chat-panel>.panel-head:first-child .toolbar select{border-radius:999px;background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.13);padding:7px 11px;font-size:10px}
+.chat-panel>.panel-head:nth-child(2){flex:0 0 auto;padding:0 3px 8px;border:0;min-height:24px}
+#activeWorkers{font-size:10px!important;color:#aab4c6!important}
+#clearChat,#unloadAll{border-radius:999px;padding:6px 9px;font-size:9px}
+.chat{flex:1;min-height:0;max-height:none;overflow:auto;padding:16px clamp(2px,4vw,30px) 22px;scroll-behavior:smooth;overscroll-behavior:contain}
+.welcome{max-width:620px;margin:clamp(55px,14vh,145px) auto 30px;text-align:left;color:#b3bdcd}
+.welcome h2{font-size:clamp(26px,5vw,38px);font-weight:520;letter-spacing:-1.3px;line-height:1.18;margin:0 0 12px;background:linear-gradient(90deg,#dce7ff,#a9b8df);background-clip:text;-webkit-background-clip:text;color:transparent}
+.welcome p{font-size:13px;line-height:1.65;margin:6px 0}.welcome>div:first-child{display:none}
+.message{gap:10px;margin:0 auto 25px;max-width:760px;width:100%;align-items:flex-start}
+.avatar{width:27px;height:27px;flex:0 0 27px;border-radius:50%;font-size:10px;background:linear-gradient(145deg,#b8d0ff,#8e9ce2);color:#111827}
+.message.user .avatar{background:#30394a;color:#e6ebf5}
+.bubble{max-width:none;min-width:0;padding-top:2px}
+.msg-head{font-size:10px;color:#aeb8c9;margin:0 0 6px;letter-spacing:.2px}
+.msg-body{font-size:14px;line-height:1.75;color:#edf0f7;white-space:pre-wrap}
+.message.user .bubble{background:rgba(80,91,116,.28);border:1px solid rgba(210,220,245,.10);border-radius:20px;padding:12px 15px;max-width:min(90%,680px);margin-left:auto}
+.message.user .msg-head{display:none}
+.message.user .avatar{order:2;margin-left:4px}
+.composer{flex:0 0 auto;position:relative;padding:10px 0 max(10px,env(safe-area-inset-bottom));border:0;background:transparent}
+.composer textarea{display:block;min-height:54px;max-height:150px;resize:none;border-radius:26px;padding:15px 17px;background:rgba(31,36,49,.82);border:1px solid rgba(220,230,255,.16);box-shadow:0 8px 32px #0003;font-size:14px;line-height:1.45;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.composer-bottom{margin-top:8px;padding:0 5px;align-items:center}.composer-bottom small{font-size:9px;color:#9ba6b8}.actions{gap:6px}.actions .btn{border-radius:999px;padding:8px 14px;font-size:10px}
+.metrics{flex:0 0 auto;justify-content:center;gap:12px;padding:5px 0 max(8px,env(safe-area-inset-bottom));border:0;font-size:9px;color:#929caf}
+.metrics .metric strong{color:#c1d3ff}
+.panel{border-color:rgba(255,255,255,.12)}
+#wallpaperLayer{z-index:0}#wallpaperScrim{background:rgba(10,12,18,.50)}
+#wallpaperDrawer{z-index:45;top:calc(env(safe-area-inset-top) + 68px)}
+#lockscreen{z-index:60;padding:calc(env(safe-area-inset-top) + 24px) 20px calc(env(safe-area-inset-bottom) + 24px);background:rgba(5,8,15,.28)}
+#lockscreen.open{display:flex}#lockscreen .lock-card{min-width:min(320px,85vw)}
+body.locked .app{filter:blur(2px);opacity:.04;pointer-events:none}
+#toast{z-index:80;bottom:calc(env(safe-area-inset-bottom) + 18px)}
+html.model-loading #wallpaperLayer{visibility:hidden}
+html.model-loading .panel,html.model-loading textarea,html.model-loading select{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+@media(max-width:600px){
+ .app{padding-left:13px;padding-right:13px}
+ header{min-height:58px}.brand small{display:none}.brand h1{font-size:15px}
+ .glass-actions{gap:4px}.glass-actions .btn{padding:7px 9px;font-size:9px}
+ #modelsButton{max-width:116px}
+ .chat-panel>.panel-head:nth-child(2){padding-bottom:5px}
+ .chat{padding:10px 1px 15px}
+ .welcome{margin-top:clamp(60px,16vh,120px)}
+ .message{margin-bottom:20px}.msg-body{font-size:14px}
+ .composer{padding-bottom:max(8px,env(safe-area-inset-bottom))}
+ .composer textarea{min-height:52px;border-radius:23px}
+ .composer-bottom small{max-width:145px}
+ .metrics{font-size:8px;gap:8px}
+}
+@media(prefers-reduced-motion:reduce){.layout>aside{transition:none}}
+
+
+/* Wallpaper-first chat surface: keep the center clear and reserve glass for controls. */
+.chat-panel.panel{background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.chat-panel .chat{background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.chat-panel>.panel-head,.chat-panel>.panel-head:nth-child(2){background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.chat-panel .composer{background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.chat-panel .composer textarea{background:rgba(12,16,25,.48)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border:1px solid rgba(225,235,255,.22);box-shadow:0 5px 22px rgba(0,0,0,.22)}
+.chat-panel .message.assistant .msg-body{text-shadow:0 1px 3px rgba(0,0,0,.72)}
+.chat-panel .message.user .bubble{background:rgba(35,43,59,.48)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:0 3px 14px rgba(0,0,0,.16)}
+.chat-panel .message .avatar{box-shadow:0 2px 10px rgba(0,0,0,.25)}
+
+
+/* ===== Interface themes (Gemini = default, no data-theme attribute) ===== */
+#themeSelect{border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:var(--text);font-size:10px;padding:6px 8px;max-width:96px}
+html[data-theme="claude"]{--t-bg:#262624;--t-text:#f4f1ea;--t-grad:#d97757;--t-ongrad:#1f1e1d;--t-user:#3a3836;--t-aside:#201f1d;--t-ta:#30302e;--t-line:rgba(255,255,255,.14);--t-avbg:#d97757;--t-avfg:#1f1e1d;--t-h2:linear-gradient(90deg,#f4f1ea,#e3b9a5);--t-ai:ui-serif,Georgia,"Times New Roman",serif;--t-r:20px;--t-btn:10px;--t-logo-r:12px;--t-ls:.5px}
+html[data-theme="chatgpt"]{--t-bg:#212121;--t-text:#ececec;--t-grad:#fff;--t-ongrad:#0d0d0d;--t-user:#303030;--t-aside:#171717;--t-ta:#303030;--t-line:rgba(255,255,255,.1);--t-avbg:#10a37f;--t-avfg:#fff;--t-h2:linear-gradient(90deg,#ececec,#ececec);--t-ai:ui-sans-serif,system-ui,-apple-system,sans-serif;--t-r:26px;--t-btn:999px;--t-logo-r:50%;--t-ls:0}
+html[data-theme="deepseek"]{--t-bg:#14161c;--t-text:#e8ecf5;--t-grad:linear-gradient(120deg,#4d6bfe,#7a8dff);--t-ongrad:#fff;--t-user:#232a45;--t-aside:#101319;--t-ta:#1d212b;--t-line:rgba(120,140,255,.22);--t-avbg:#4d6bfe;--t-avfg:#fff;--t-h2:linear-gradient(90deg,#fff,#9fb0ff);--t-ai:ui-sans-serif,system-ui,-apple-system,sans-serif;--t-r:14px;--t-btn:10px;--t-logo-r:10px;--t-ls:.3px}
+html[data-theme="kimchi"]{--t-bg:#080b12;--t-text:#edf3ff;--t-grad:linear-gradient(120deg,#54dced,#788dff);--t-ongrad:#06101a;--t-user:rgba(37,51,78,.7);--t-aside:#101622;--t-ta:#0b111c;--t-line:#263348;--t-avbg:#1b2b42;--t-avfg:#62e6f5;--t-h2:linear-gradient(90deg,#62e6f5,#7285ff);--t-ai:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;--t-r:12px;--t-btn:9px;--t-logo-r:13px;--t-ls:3px}
+html[data-theme] body{background:var(--t-bg);color:var(--t-text)}
+html[data-theme] #wallpaperLayer{background:var(--t-bg)}
+html[data-theme] body:not(.has-wallpaper) #wallpaperScrim{display:none}
+html[data-theme] .logo,html[data-theme] .btn.primary{background:var(--t-grad);color:var(--t-ongrad);border:0}
+html[data-theme] .logo{border-radius:var(--t-logo-r)}
+html[data-theme] .brand h1{letter-spacing:var(--t-ls)}
+html[data-theme] .message .avatar{background:var(--t-avbg);color:var(--t-avfg)}
+html[data-theme] .message.user .avatar{background:var(--t-user);color:var(--t-text)}
+html[data-theme] .chat-panel .message.user .bubble{background:var(--t-user)!important;border-color:var(--t-line)}
+html[data-theme] .chat-panel .composer textarea{background:var(--t-ta)!important;border-color:var(--t-line);border-radius:var(--t-r);color:var(--t-text)}
+html[data-theme] .layout>aside{background:var(--t-aside);border-right-color:var(--t-line)}
+html[data-theme] .welcome h2{background:var(--t-h2);-webkit-background-clip:text;background-clip:text;font-family:var(--t-ai)}
+html[data-theme] .welcome p,html[data-theme] .chat-panel .message.assistant .msg-body{font-family:var(--t-ai);text-shadow:none}
+html[data-theme] .glass-actions .btn,html[data-theme] .actions .btn,html[data-theme] #themeSelect{border-radius:var(--t-btn)}
+html[data-theme] .glass-actions .btn,html[data-theme] #themeSelect{border-color:var(--t-line)}
+/* ===== Attachments ===== */
+#attachTray{display:none;gap:6px;flex-wrap:wrap;padding:0 4px 8px}
+#attachTray.has{display:flex}
+.chip{display:flex;align-items:center;gap:6px;max-width:100%;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);font-size:10px}
+.chip img{width:22px;height:22px;border-radius:6px;object-fit:cover}
+.chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:46vw}
+.chip button{background:none;border:0;color:inherit;padding:0 2px;font-size:14px}
+#attach{padding:8px 11px}
+</style>
+</head>
+<body>
+<div id="wallpaperLayer" aria-hidden="true">
+  <video id="wallpaperVideo" loop muted playsinline webkit-playsinline></video>
+  <img id="wallpaperImage" alt="" />
+  <div id="wallpaperScrim"></div>
+</div>
+<div id="wallpaperDrawer" aria-label="Wallpaper settings">
+  <div class="panel-head" style="padding:0 0 10px;border:0"><strong>WALLPAPER STUDIO</strong><button class="btn tiny" id="closeWallpaper">CLOSE</button></div>
+  <p class="info">Choose a direct MP4/WebM or image URL, or import a file. MotionBGs pages are browse links; paste a direct media URL to apply a wallpaper.</p>
+  <div class="drawer-row">
+    <a class="btn tiny" href="https://motionbgs.com/mobile/" target="_blank" rel="noopener">MOBILE WALLPAPERS ↗</a>
+    <a class="btn tiny" href="https://motionbgs.com/4k/" target="_blank" rel="noopener">4K WALLPAPERS ↗</a>
+  </div>
+  <label for="wallpaperUrl">Direct media URL</label>
+  <input id="wallpaperUrl" type="url" placeholder="https://…/wallpaper.mp4 or .jpg">
+  <div class="drawer-row" style="margin-top:8px"><button class="btn primary" id="applyWallpaper">APPLY URL</button><button class="btn" id="clearWallpaper">CLEAR</button></div>
+  <label for="wallpaperFile">Import local video or image</label>
+  <input id="wallpaperFile" type="file" accept="video/mp4,video/webm,image/*" style="width:100%;font-size:11px">
+  <label for="wallpaperDim">Wallpaper dimming <span id="wallpaperDimValue">46%</span></label>
+  <input id="wallpaperDim" type="range" min="20" max="75" value="46" style="width:100%">
+  <label class="drawer-row" style="justify-content:flex-start"><input id="pauseOnGenerate" type="checkbox" checked style="flex:0 0 auto"> Pause motion while generating</label>
+  <div class="info" id="wallpaperStatus" style="margin-top:8px">No wallpaper selected.</div>
+</div>
+<div id="lockscreen" role="dialog" aria-modal="true" aria-label="Kimchi lockscreen preview" aria-hidden="true">
+  <div><div class="lock-clock" id="lockClock">9:41</div><div class="lock-date" id="lockDate"></div><div class="lock-card"><div style="font-size:11px;letter-spacing:2px;color:#b9e9ff">KIMCHI LOCAL AI</div><div id="lockModel" style="margin:7px 0 13px">No model loaded</div><button type="button" class="btn primary" id="unlockButton">UNLOCK TO CHAT</button><div style="margin-top:12px"><label style="font-size:11px"><input id="lockCardTest" type="checkbox" checked> Show glass card preview</label></div></div></div>
+</div>
+<div class="app">
+<header>
+  <div class="brand">
+    <div class="logo">K</div>
+    <div>
+      <h1>KIMCHI</h1>
+      <small>LOCAL INTELLIGENCE ENGINE</small>
+    </div>
+  </div>
+  <div class="glass-actions"><button type="button" class="btn tiny ghost" id="modelsButton">MODEL · SELECT</button><button type="button" class="btn tiny ghost" id="lockButton">LOCKSCREEN</button><button class="btn tiny ghost" id="wallpaperButton">WALLPAPER</button><div class="status"><span class="dot"></span><span id="systemStatus">INITIALIZING</span></div><select id="themeSelect" aria-label="Interface style"><option value="gemini">Gemini</option><option value="claude">Claude</option><option value="chatgpt">ChatGPT</option><option value="deepseek">DeepSeek</option><option value="kimchi">Kimchi</option></select></div>
+</header>
+
+<div id="drawerScrim" aria-hidden="true"></div>
+<div class="layout">
+<aside id="modelDrawer" aria-label="Models and conversations">
+  <div id="modelDrawerHeader"><span>YOUR LOCAL MODELS</span><button type="button" class="btn tiny" id="closeModels">DONE</button></div>
+  <section class="panel">
+    <div class="panel-head">
+      <h2>MODEL REGISTRY</h2>
+      <span class="muted small" id="modelCount">Scanning…</span>
+    </div>
+    <div class="models" id="modelList">
+      <div class="info">Loading WebLLM model catalog…</div>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="info" id="gpuInfo">Checking browser GPU support…</div>
+      <div style="height:8px"></div>
+      <div class="info" id="engineDiag" role="status" aria-live="polite">Engine diagnostics will appear here.</div>
+      <div style="height:8px"></div>
+      <button class="btn tiny ghost" id="copyDiagnostics">COPY DIAGNOSTICS</button>
+      <div style="height:10px"></div>
+      <div class="info">First load requires internet for the runtime and model weights. Cached weights may work offline later, but the CDN runtime is not yet bundled for guaranteed offline startup. On iPhone, load one small model at a time; avoid Parallel mode.</div>
+    </div>
+  </section>
+
+  <section class="panel" style="margin-top:14px">
+    <div class="panel-head">
+      <h2>CONVERSATIONS</h2>
+      <button class="btn tiny" id="newChat">+ NEW</button>
+    </div>
+    <div class="history-list" id="historyList"></div>
+  </section>
+</aside>
+
+<main class="panel chat-panel">
+  <div class="panel-head">
+    <h2>COMMAND INTERFACE</h2>
+    <div class="toolbar">
+      <select id="mode" aria-label="Chat mode" style="display:none"><option value="single" selected>Chat</option></select>
+    </div>
+  </div>
+  <div class="panel-head" style="border-top:0">
+    <div>
+      <div class="small muted">ACTIVE WORKERS</div>
+      <div id="activeWorkers" style="font-size:12px;margin-top:4px">0 loaded</div>
+    </div>
+    <div class="toolbar">
+      <button class="btn tiny ghost" id="clearChat">CLEAR CHAT</button>
+      <button class="btn tiny danger" id="unloadAll">UNLOAD ALL</button>
+    </div>
+  </div>
+  <div class="chat" id="chat">
+    <div class="welcome">
+      <div style="font-size:34px">◈</div>
+      <h2>Good to see you.</h2>
+      <p>What would you like to work through today?</p>
+      <p>Choose a local model from the top bar to begin. Your conversations stay on this device.</p>
+    </div>
+  </div>
+  <div class="composer">
+    <div id="attachTray"></div>
+    <input type="file" id="attachInput" multiple hidden accept="image/*,text/*,application/json,.md,.csv,.tsv,.json,.js,.ts,.py,.html,.css,.xml,.yaml,.yml,.log,.txt">
+    <textarea id="prompt" enterkeyhint="send"
+      placeholder="Ask Kimchi anything…"></textarea>
+    <div class="composer-bottom">
+      <small>ENTER to send · SHIFT + ENTER for a new line</small>
+      <div class="actions">
+        <button type="button" class="btn" id="attach" aria-label="Attach photo or file">📎</button>
+        <button class="btn" id="stop" disabled>STOP</button>
+        <button class="btn primary" id="send" disabled>SEND ↗</button>
+      </div>
+    </div>
+  </div>
+  <div class="metrics">
+    <span class="metric">MODE: <strong id="metricMode">SINGLE</strong></span>
+    <span class="metric">WORDS/SEC: <strong id="metricSpeed">—</strong></span>
+    <span class="metric">LAST RESPONSE: <strong id="metricTime">—</strong></span>
+    <span class="metric">HISTORY: <strong>LOCAL</strong></span>
+  </div>
+</main>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* Mobile controls are wired before the module so they remain usable if the AI runtime fails. */
+(function(){
+  const $=id=>document.getElementById(id);
+  const lock=$('lockscreen'),drawer=$('modelDrawer'),scrim=$('drawerScrim');
+  function updateClock(){
+    const now=new Date();
+    const clock=$('lockClock'),date=$('lockDate'),model=$('lockModel');
+    if(clock)clock.textContent=now.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+    if(date)date.textContent=now.toLocaleDateString([], {weekday:'long',month:'long',day:'numeric'});
+    if(model)model.textContent=window.__KIMCHI_ACTIVE_MODEL__||'No model loaded';
+  }
+  function openLock(e){e?.preventDefault();updateClock();lock?.classList.add('open');lock?.setAttribute('aria-hidden','false');document.body.classList.add('locked');}
+  function closeLock(e){e?.preventDefault();lock?.classList.remove('open');lock?.setAttribute('aria-hidden','true');document.body.classList.remove('locked');}
+  function openModels(e){e?.preventDefault();drawer?.classList.add('open');scrim?.classList.add('open');scrim?.setAttribute('aria-hidden','false');}
+  function closeModels(e){e?.preventDefault();drawer?.classList.remove('open');scrim?.classList.remove('open');scrim?.setAttribute('aria-hidden','true');}
+  $('lockButton')?.addEventListener('click',openLock);
+  $('unlockButton')?.addEventListener('click',closeLock);
+  lock?.addEventListener('click',e=>{if(e.target===lock)closeLock(e)});
+  $('lockCardTest')?.addEventListener('change',e=>{
+    const card=lock?.querySelector('.lock-card');if(!card)return;
+    card.style.background=e.target.checked?'rgba(10,16,27,.52)':'transparent';
+    card.style.borderColor=e.target.checked?'#ffffff35':'transparent';
+  });
+  const THEME_BG={gemini:'#10131b',claude:'#262624',chatgpt:'#212121',deepseek:'#14161c',kimchi:'#080b12'};
+  function applyTheme(t){
+    if(!THEME_BG[t])t='gemini';
+    if(t==='gemini')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',t);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',THEME_BG[t]);
+    const sel=$('themeSelect');if(sel)sel.value=t;
+    try{localStorage.setItem('kimchi.theme.v1',t)}catch(_){}
+  }
+  $('themeSelect')?.addEventListener('change',e=>applyTheme(e.target.value));
+  let savedTheme='gemini';try{savedTheme=localStorage.getItem('kimchi.theme.v1')||'gemini'}catch(_){}
+  applyTheme(savedTheme);
+  $('modelsButton')?.addEventListener('click',openModels);
+  $('closeModels')?.addEventListener('click',closeModels);
+  scrim?.addEventListener('click',closeModels);
+  $('wallpaperButton')?.addEventListener('click',e=>{e.preventDefault();$('wallpaperDrawer')?.classList.toggle('open')});
+  $('closeWallpaper')?.addEventListener('click',e=>{e.preventDefault();$('wallpaperDrawer')?.classList.remove('open')});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeLock();closeModels();$('wallpaperDrawer')?.classList.remove('open')}});
+  window.__KIMCHI_UPDATE_LOCKSCREEN__=updateClock;
+  window.setInterval(()=>{if(lock?.classList.contains('open'))updateClock()},15000);
+})();
+</script>
+
+<script>
+/* Kimchi registry bootstrap: render the interface before the remote AI module loads. */
+(function(){
+  var list=document.getElementById('modelList');
+  var count=document.getElementById('modelCount');
+  var names=['Gemma 4 E2B','Qwen 3.5 · 0.8B','Qwen 3.5 · 2B','Qwen 3.5 · 4B','Qwen 3.5 · 9B','SmolLM2 · 1.7B'];
+  if(list){
+    list.innerHTML='';
+    names.forEach(function(name){
+      var card=document.createElement('div'); card.className='model';
+      var title=document.createElement('div'); title.className='model-name'; title.textContent=name;
+      var detail=document.createElement('div'); detail.className='model-id'; detail.textContent='Waiting for WebLLM catalog…';
+      var tag=document.createElement('span'); tag.className='tag tag-loading'; tag.textContent='INITIALIZING';
+      var top=document.createElement('div'); top.className='model-top'; top.append(title,tag);
+      card.append(top,detail); list.append(card);
+    });
+  }
+  if(count) count.textContent='Starting registry…';
+  var status=document.getElementById('systemStatus');
+  if(status) status.textContent='STARTING';
+  window.__KIMCHI_BOOTSTRAP_DONE__=true;
+  window.setTimeout(function(){
+    if(!window.__KIMCHI_MODULE_STARTED__){
+      if(status) status.textContent='MODULE BLOCKED';
+      if(count) count.textContent='Runtime did not start';
+      if(list){
+        var note=document.createElement('div'); note.className='info';
+        note.textContent='Kimchi’s AI JavaScript module did not start. Open this page from a supported HTTPS/app origin, not a file preview. The registry shell is visible, but models cannot load until the runtime starts.';
+        list.append(note);
+      }
+      var diag=document.getElementById('engineDiag');
+      if(diag) diag.textContent='Startup watchdog: the module script did not execute. Check the app web view, page origin, and module-script support.';
+    }
+  },12000);
+})();
+</script>
+
+<!-- Harden console in the page realm before any module import. -->
+<script>
+(function(){
+  var buf=window.__KIMCHI_LOG_BUF__=[];
+  window.__kimchiLog=function(tag,args){
+    var t;
+    try{t=args.map(function(a){
+      if(a&&a.message)return (a.name||"Error")+": "+a.message;
+      if(a&&typeof a==="object"){try{return JSON.stringify(a)}catch(_){return String(a)}}
+      return String(a);
+    }).join(" ");}catch(_){t="(unprintable)";}
+    buf.push("["+tag+"] "+t.slice(0,400));if(buf.length>80)buf.shift();
+  };
+  function repairConsole(target){
+    var methods=["log","warn","error","info","debug","trace"];
+    if(!target || (typeof target!=="object" && typeof target!=="function")) target={};
+    methods.forEach(function(name){
+      var current;
+      try{current=target[name]}catch(_){current=null}
+      if(typeof current==="function"&&current.__kimchi)return;
+      var fallback=(typeof current==="function")?current:null;
+      var safe=function(){
+        try{window.__kimchiLog(name,Array.prototype.slice.call(arguments))}catch(_){}
+        if(!fallback)return;
+        try{return Reflect.apply(fallback,target,Array.prototype.slice.call(arguments))}catch(_){return}
+      };
+      safe.__kimchi=true;
+      // A native or host method may be non-writable; replace it with a plain JS function.
+      try{Object.defineProperty(target,name,{configurable:true,enumerable:true,writable:true,value:safe})}
+      catch(_){try{target[name]=safe}catch(__){}}
+      try{if(typeof target[name]!=="function" || typeof target[name].bind!=="function"){
+        var replacement=function(){return safe.apply(target,arguments)};
+        Object.defineProperty(target,name,{configurable:true,writable:true,value:replacement});
+      }}catch(_){ }
+    });
+    return target;
+  }
+  var current;
+  try{current=window.console}catch(_){current=null}
+  current=repairConsole(current);
+  try{window.console=current}catch(_){ }
+  // Re-apply the guard if an embedded viewer or library replaces window.console later.
+  try{
+    var descriptor=Object.getOwnPropertyDescriptor(window,"console");
+    if(!descriptor || descriptor.configurable){
+      var stored=current;
+      Object.defineProperty(window,"console",{
+        configurable:true,enumerable:true,
+        get:function(){return stored},
+        set:function(value){stored=repairConsole(value)}
+      });
+    }
+  }catch(_){ }
+  window.__KIMCHI_INSTALL_CONSOLE_GUARD__=function(){
+    var c;try{c=window.console}catch(_){c=null}
+    c=repairConsole(c);
+    try{window.console=c}catch(_){ }
+    return !!(c && ["log","warn","error","info","debug","trace"].every(function(k){
+      try{return typeof c[k]==="function" && typeof c[k].bind==="function"}catch(_){return false}
+    }));
+  };
+  window.__KIMCHI_CONSOLE_GUARD__=window.__KIMCHI_INSTALL_CONSOLE_GUARD__();
+  try{
+    var AP=window.GPUAdapter&&window.GPUAdapter.prototype;
+    if(AP&&typeof AP.requestDevice==="function"&&!AP.requestDevice.__kimchi){
+      var origRD=AP.requestDevice;
+      AP.requestDevice=async function(desc){
+        try{window.__kimchiLog("gpu",["requestDevice",JSON.stringify(desc||{})])}catch(_){}
+        var dev=await origRD.apply(this,arguments);
+        try{
+          dev.addEventListener("uncapturederror",function(e){window.__kimchiLog("gpu",["UNCAPTURED ERROR",(e.error&&e.error.message)||String(e.error)])});
+          dev.lost.then(function(i){window.__kimchiLog("gpu",["DEVICE LOST",i.reason,i.message])});
+        }catch(_){}
+        return dev;
+      };
+      AP.requestDevice.__kimchi=true;
+    }
+  }catch(_){}
+})();
+</script>
+
+<script type="module">
+window.__KIMCHI_MODULE_STARTED__=true;
+// Re-check console in module realm before importing WebLLM.
+window.__KIMCHI_CONSOLE_GUARD__ = window.__KIMCHI_INSTALL_CONSOLE_GUARD__?.() || false;
+let webllm = null;
+const WEBLLM_VERSION = "0.2.89";
+const WEBLLM_URL = `https://esm.run/@mlc-ai/web-llm@${WEBLLM_VERSION}`;
+
+const $ = id => document.getElementById(id);
+const STORAGE_KEY = "kimchi.sessions.v1";
+
+const SPECS = [
+  {
+    key:"gemma4",
+    title:"Gemma 4 E2B",
+    family:"Google · Gemma 4",
+    patterns:[/gemma.?4.*e2b/i,/gemma-4-e2b/i]
+  },
+  {
+    key:"qwen08",
+    title:"Qwen 3.5 · 0.8B",
+    family:"Alibaba · Qwen 3.5",
+    patterns:[/qwen3\.?5.*0[._-]?8b/i]
+  },
+  {
+    key:"qwen2",
+    title:"Qwen 3.5 · 2B",
+    family:"Alibaba · Qwen 3.5",
+    patterns:[/qwen3\.?5.*2b/i]
+  },
+  {
+    key:"qwen4",
+    title:"Qwen 3.5 · 4B",
+    family:"Alibaba · Qwen 3.5",
+    patterns:[/qwen3\.?5.*4b/i]
+  },
+  {
+    key:"qwen9",
+    title:"Qwen 3.5 · 9B",
+    family:"Alibaba · Qwen 3.5",
+    patterns:[/qwen3\.?5.*9b/i]
+  },
+  {
+    key:"llama1b",
+    title:"Llama 3.2 · 1B (q4f16 · iOS test)",
+    family:"Meta · Llama 3.2 · mobile-friendly q4f16",
+    patterns:[/Llama-3\.2-1B-Instruct-q4f16_1-MLC/i],
+    performance:true
+  },
+  {
+    key:"smol",
+    title:"SmolLM2 · 360M (iPhone test)",
+    family:"Hugging Face · SmolLM2 · lightweight q4f16",
+    patterns:[/SmolLM2-360M-Instruct-q4f16_1-MLC/i],
+    performance:true
+  },
+  {
+    key:"qwen25_05",
+    title:"Qwen 2.5 · 0.5B (q4f16)",
+    family:"Alibaba · Qwen 2.5 · lightweight q4f16",
+    patterns:[/Qwen2\.5-0\.5B-Instruct-q4f16_1-MLC/i],
+    performance:true
+  }
+];
+
+let catalog = [];
+let extraSpecs = [];
+let models = new Map();
+let lastDiagnostic = "Not initialized";
+let gpuAdapter = null;
+let gpuState = "probing"; // probing | ready | unavailable
+let showAllModels = false;
+const IPHONE_VRAM_MB = 2200;
+const idleStatus = () => gpuAdapter ? "READY · LOAD MODEL" : "RUNTIME READY · GPU OFFLINE";
+let lastModelAttempt = null;
+let sessions = readSessions();
+let currentSession = newSession();
+let busy = false;
+let abortRequested = false;
+let startedAt = 0;
+let generatedWords = 0;
+// Shared inference diagnostics state; keep it in the same top-level script scope as generateOne().
+let lastInference = null;
+
+function readSessions(){
+  try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]")}
+  catch{return []}
+}
+function saveSessions(){
+  try{
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(sessions.slice(0,40)));
+  }catch(e){toast("Browser storage is full; conversation could not be saved.");}
+}
+function uid(){
+  return crypto.randomUUID ? crypto.randomUUID() :
+    "k"+Date.now().toString(36)+Math.random().toString(36).slice(2);
+}
+function newSession(){
+  return {id:uid(),title:"New conversation",created:Date.now(),
+    updated:Date.now(),messages:[]};
+}
+function setDiagnostic(message){
+  lastDiagnostic=String(message);
+  const node=$("engineDiag");
+  if(node)node.textContent=lastDiagnostic;
+}
+function describeError(error){
+  if(error==null)return "Unknown error (empty rejection)";
+  const parts=[];
+  try{parts.push("name: "+(error.name||"unknown"));}catch{}
+  try{parts.push("message: "+(error.message||String(error)));}catch{}
+  try{if(error.cause!==undefined)parts.push("cause: "+(error.cause?.message||String(error.cause)));}catch{}
+  try{if(error.code!==undefined)parts.push("code: "+error.code);}catch{}
+  try{if(error.stack)parts.push("stack: "+error.stack);}catch{}
+  try{if(error.errors)parts.push("nested errors: "+Array.from(error.errors).map(x=>x?.message||String(x)).join(" | "));}catch{}
+  return parts.join("\n")||String(error);
+}
+function withTimeout(promise,label,ms=10000){
+  let timer;
+  return Promise.race([
+    Promise.resolve(promise),
+    new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(label+" timed out after "+ms+" ms")),ms);})
+  ]).finally(()=>clearTimeout(timer));
+}
+function logMilestone(message){
+  const stamp=new Date().toLocaleTimeString();
+  const line="["+stamp+"] "+message;
+  lastDiagnostic=(lastDiagnostic&&lastDiagnostic!=="Not initialized"?lastDiagnostic+"\n":"")+line;
+  const node=$("engineDiag");
+  if(node)node.textContent=lastDiagnostic;
+}
+function diagnosticReport(){
+  return [
+    "KIMCHI DIAGNOSTICS",
+    "Build: Kimchi Local AI · iOS runtime recovery v3 (load-failure capture) · 2026-11-19",
+    "URL: "+location.href,
+    "User agent: "+navigator.userAgent,
+    "Online: "+navigator.onLine,
+    "Secure context: "+window.isSecureContext,
+    "WebGPU: "+!!navigator.gpu,
+    "WebGPU adapter: "+($("gpuInfo")?.textContent||"unknown"),
+    "GPU features: "+(gpuAdapter?[...gpuAdapter.features].join(", "):"not captured"),
+    "GPU limits: "+(gpuAdapter?JSON.stringify({maxBufferSize:gpuAdapter.limits.maxBufferSize,maxStorageBufferBindingSize:gpuAdapter.limits.maxStorageBufferBindingSize,maxComputeWorkgroupsPerDimension:gpuAdapter.limits.maxComputeWorkgroupsPerDimension}):"not captured"),
+    "GPU shader-f16 supported: "+!!(gpuAdapter&&gpuAdapter.features.has("shader-f16")),
+    "Storage backend preference: "+((typeof indexedDB!=="undefined")?"indexeddb":((typeof caches!=="undefined")?"cache":"none")),
+    "GPU state: "+gpuState,
+    "Last model attempt: "+(lastModelAttempt?JSON.stringify(lastModelAttempt):"none"),
+    "Last inference: "+(lastInference?JSON.stringify(lastInference):"none"),
+    "WebLLM version: "+WEBLLM_VERSION,
+    "Console guard: "+!!window.__KIMCHI_CONSOLE_GUARD__,
+    "Catalog models: "+catalog.length,
+    "Loaded models: "+[...models.values()].filter(x=>x.status==="ready").length,
+    "Last diagnostic: "+lastDiagnostic,
+    "Runtime/GPU log (last 40 lines):\n"+((window.__KIMCHI_LOG_BUF__||[]).slice(-40).join("\n")||"(nothing captured)")
+  ].join("\n");
+}
+function toast(message){
+  const el=$("toast");el.textContent=message;el.style.display="block";
+  clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.style.display="none",3500);
+}
+function escapeHTML(s){
+  return String(s).replace(/[&<>"']/g,c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[c]));
+}
+function saveCurrent(){
+  if(!currentSession.messages.length)return;
+  currentSession.updated=Date.now();
+  const first=currentSession.messages.find(m=>m.role==="user");
+  if(first && currentSession.title==="New conversation"){
+    currentSession.title=(first.display||first.content).slice(0,42)||
+      "New conversation";
+  }
+  const i=sessions.findIndex(s=>s.id===currentSession.id);
+  if(i>=0)sessions[i]=currentSession;
+  else sessions.unshift(currentSession);
+  sessions.sort((a,b)=>b.updated-a.updated);
+  saveSessions();renderHistory();
+}
+function renderHistory(){
+  const root=$("historyList");root.replaceChildren();
+  if(!sessions.length){
+    root.innerHTML='<div class="info">Your saved conversations will appear here.</div>';
+    return;
+  }
+  for(const s of sessions){
+    const row=document.createElement("div");row.className="history-item";
+    const open=document.createElement("button");
+    open.className="btn tiny";open.textContent=s.title||"Conversation";
+    open.title=new Date(s.updated).toLocaleString();
+    open.onclick=()=>restoreSession(s.id);
+    const del=document.createElement("button");
+    del.className="btn tiny danger";del.textContent="×";
+    del.setAttribute("aria-label","Delete conversation");
+    del.onclick=()=>{
+      sessions=sessions.filter(x=>x.id!==s.id);
+      saveSessions();renderHistory();
+      if(currentSession.id===s.id)newChat();
+    };
+    row.append(open,del);root.append(row);
+  }
+}
+function restoreSession(id){
+  const found=sessions.find(s=>s.id===id);
+  if(!found)return;
+  currentSession=JSON.parse(JSON.stringify(found));
+  renderMessages();toast("Conversation restored.");
+}
+function newChat(){
+  currentSession=newSession();renderMessages();$("prompt").value="";
+}
+function renderMessages(){
+  const root=$("chat");root.replaceChildren();
+  if(!currentSession.messages.length){
+    root.innerHTML='<div class="welcome"><div style="font-size:34px">◈</div><h2>Good to see you.</h2><p>What would you like to work through today?</p><p>Choose a local model from the top bar to begin. Your conversations stay on this device.</p></div>';
+    return;
+  }
+  for(const m of currentSession.messages)addMessage(m.role,m.display||m.content,m.model);
+  root.scrollTop=root.scrollHeight;
+}
+function addMessage(role,content,model=""){
+  const root=$("chat");
+  const empty=root.querySelector(".welcome");if(empty)empty.remove();
+  const item=document.createElement("div");item.className="message "+role;
+  const avatar=document.createElement("div");avatar.className="avatar";
+  avatar.textContent=role==="user"?"YOU":"K";
+  const bubble=document.createElement("div");bubble.className="bubble";
+  const head=document.createElement("div");head.className="msg-head";
+  head.textContent=role==="user"?"YOU":(model||"KIMCHI");
+  const body=document.createElement("div");body.className="msg-body";
+  body.textContent=content;
+  bubble.append(head,body);item.append(avatar,bubble);root.append(item);
+  root.scrollTop=root.scrollHeight;
+  return body;
+}
+
+function resolveSpec(spec){
+  const rank=id=>/q4f16/i.test(id)?0:(/q4f32/i.test(id)?2:1);
+  for(const pattern of spec.patterns){
+    let best=null;
+    for(const m of catalog){
+      if(typeof m?.model_id!=="string"||!pattern.test(m.model_id))continue;
+      if(!best||rank(m.model_id)<rank(best.model_id))best=m;
+    }
+    if(best)return best;
+  }
+  return null;
+}
+function buildExtraSpecs(){
+  const taken=new Set(SPECS.map(s=>resolveSpec(s)?.model_id).filter(Boolean));
+  const isLLM=r=>r.model_type===undefined||r.model_type===0||r.model_type===webllm?.ModelType?.LLM;
+  return catalog
+    .filter(r=>r&&typeof r.model_id==="string"&&!taken.has(r.model_id)&&!/q4f32/i.test(r.model_id)&&isLLM(r))
+    .sort((a,b)=>(a.vram_required_MB??1e9)-(b.vram_required_MB??1e9))
+    .map(record=>({key:"catalog_"+record.model_id,title:record.model_id,
+      family:"WebLLM built-in catalog model",patterns:[],record}));
+}
+function friendlyHint(error){
+  const t=((error?.name||"")+" "+(error?.message||String(error||""))).toLowerCase();
+  if(/contextwindowsizeexceeded|context window/.test(t))return "The chat is longer than the model's 1024-token context. Start a new chat.";
+  if(/quota|storage is full/.test(t))return "iPhone storage quota reached while caching the model. Free space or pick a smaller model.";
+  if(/device.*lost|devicelost|out of memory|oom/.test(t))return "The GPU ran out of memory or was reset. Close other apps, unload models, and try a smaller one.";
+  if(/maxstoragebufferbindingsize|maxbuffersize|exceeds.*limit/.test(t))return "This model needs larger GPU buffers than this iPhone exposes. Pick a smaller model.";
+  if(/cannot find model record|model record/.test(t))return "That model ID is not in the WebLLM "+WEBLLM_VERSION+" catalog.";
+  if(/failed to fetch|networkerror|load failed|network/.test(t))return "Download failed. Check the connection (huggingface.co must be reachable) and retry.";
+  if(/exitstatus|exit\(1\)|abort/.test(t))return "WebLLM's WASM runtime aborted, usually GPU memory or shader compile failure. Try a smaller model.";
+  return "";
+}
+async function probeGPU(updateStatus=false){
+  gpuAdapter=null;gpuState="probing";
+  if(!window.isSecureContext){
+    $("gpuInfo").textContent="WebGPU unavailable: page is not a secure context.";
+    logMilestone("WebGPU probe skipped because the page is not a secure context.");
+  }else if(!navigator.gpu || typeof navigator.gpu.requestAdapter!=="function"){
+    $("gpuInfo").textContent="WebGPU API is not exposed by this browser or app web view.";
+    logMilestone("WebGPU API unavailable: navigator.gpu.requestAdapter() is missing.");
+  }else{
+    try{
+      logMilestone("Requesting WebGPU adapter…");
+      gpuAdapter=await withTimeout(navigator.gpu.requestAdapter({powerPreference:"high-performance"}),"WebGPU adapter request",15000);
+      if(!gpuAdapter){
+        $("gpuInfo").textContent="WebGPU is exposed, but requestAdapter() returned null.";
+        logMilestone("WebGPU adapter request returned null.");
+      }else{
+        const info=gpuAdapter.info||{};
+        $("gpuInfo").textContent="WebGPU adapter ready · "+(info.description||info.device||info.vendor||"GPU adapter detected");
+        logMilestone("WebGPU adapter ready. Features: "+[...gpuAdapter.features].join(", "));
+      }
+    }catch(gpuError){
+      gpuAdapter=null;
+      $("gpuInfo").textContent="WebGPU adapter failed: "+(gpuError?.message||String(gpuError));
+      logMilestone("WebGPU probe failed independently: "+describeError(gpuError));
+    }
+  }
+  gpuState=gpuAdapter?"ready":"unavailable";
+  if(updateStatus&&![...models.values()].some(x=>x.status==="ready"))$("systemStatus").textContent=idleStatus();
+  renderModels();
+  return !!gpuAdapter;
+}
+function modelCard(spec){
+  const record=spec.record||resolveSpec(spec);
+  const loaded=models.get(spec.key);
+  const card=document.createElement("div");card.className="model";
+  const top=document.createElement("div");top.className="model-top";
+  const name=document.createElement("div");name.className="model-name";
+  name.textContent=spec.title;
+  const tags=document.createElement("div");
+  if(spec.performance){
+    const badge=document.createElement("span");
+    badge.className="tag tag-perf";badge.textContent="⚡ PERFORMANCE MODE";
+    tags.append(badge);
+  }
+  if(loaded?.status==="ready"){
+    const badge=document.createElement("span");
+    badge.className="tag tag-ready";badge.textContent="LOADED";tags.append(badge);
+  }else if(loaded?.status==="loading"){
+    const badge=document.createElement("span");
+    badge.className="tag tag-loading";badge.textContent="LOADING";tags.append(badge);
+  }else if(!record){
+    const badge=document.createElement("span");
+    badge.className="tag tag-unavailable";badge.textContent="NOT IN CATALOG";
+    tags.append(badge);
+  }
+  top.append(name,tags);
+  const id=document.createElement("div");id.className="model-id";
+  id.textContent=record?record.model_id+(record.vram_required_MB?" · ~"+Math.round(record.vram_required_MB)+" MB":""):spec.family+" · Not present in this WebLLM build";
+  const actions=document.createElement("div");actions.className="model-actions";
+  const load=document.createElement("button");load.className="btn tiny";
+  const missingFeatures=(record?.required_features||[]).filter(feature=>gpuAdapter&&!gpuAdapter.features.has(feature));
+  const canRetryGPU=!gpuAdapter&&gpuState==="unavailable"&&!!navigator.gpu;
+  load.textContent=loaded?.status==="ready"?"UNLOAD":
+    loaded?.status==="loading"?"LOADING…":
+    gpuState==="probing"?"CHECKING GPU…":
+    canRetryGPU?"RETRY GPU CHECK":
+    !gpuAdapter?"WEBGPU UNAVAILABLE":
+    missingFeatures.length?"GPU FEATURE MISSING":"LOAD MODEL";
+  load.disabled=!record||gpuState==="probing"||(!gpuAdapter&&!canRetryGPU)||missingFeatures.length>0||loaded?.status==="loading"||busy;
+  load.onclick=()=>{
+    if(loaded?.status==="ready")return unloadModel(spec.key);
+    if(!gpuAdapter)return probeGPU(true);
+    return loadModel(spec,record);
+  };
+  const check=document.createElement("input");check.type="checkbox";
+  check.title="Select this model for execution";
+  check.checked=!!loaded?.selected;
+  check.disabled=loaded?.status!=="ready";
+  check.onchange=()=>{
+    if(loaded)loaded.selected=check.checked;
+    updateControls();
+  };
+  actions.append(load,check);
+  card.append(top,id,actions);
+  if(loaded?.status==="loading"){
+    const p=document.createElement("div");p.className="progress";
+    const bar=document.createElement("span");bar.style.width=(loaded.progress||0)+"%";
+    p.append(bar);card.append(p);
+    const detail=document.createElement("div");detail.className="model-id";
+    detail.textContent=loaded.detail||"Initializing…";card.append(detail);
+  }
+  return card;
+}
+function renderModels(){
+  const root=$("modelList");const prevScroll=root.scrollTop;root.replaceChildren();
+  let shown=0,hiddenMissing=0,hiddenLarge=0,hiddenUnsupported=0;
+  const ordered=[...SPECS].sort((a,b)=>((b.performance?1:0)-(a.performance?1:0))||
+    ((resolveSpec(a)?.vram_required_MB??1e9)-(resolveSpec(b)?.vram_required_MB??1e9)));
+  for(const spec of ordered){
+    if(!resolveSpec(spec)&&!models.has(spec.key)){hiddenMissing++;continue;}
+    root.append(modelCard(spec));shown++;
+  }
+  for(const spec of extraSpecs){
+    const rec=spec.record,keep=models.has(spec.key);
+    if(gpuAdapter&&(rec.required_features||[]).some(f=>!gpuAdapter.features.has(f))&&!keep){hiddenUnsupported++;continue;}
+    if(typeof rec.vram_required_MB==="number"&&rec.vram_required_MB>IPHONE_VRAM_MB&&!showAllModels&&!keep){hiddenLarge++;continue;}
+    root.append(modelCard(spec));shown++;
+  }
+  const notes=[];
+  if(hiddenMissing)notes.push(hiddenMissing+" preferred model(s) are not in WebLLM "+WEBLLM_VERSION+"'s catalog and are hidden.");
+  if(hiddenUnsupported)notes.push(hiddenUnsupported+" catalog model(s) need GPU features this device does not expose.");
+  if(notes.length){const n=document.createElement("div");n.className="info";n.style.padding="8px 2px";n.textContent=notes.join(" ");root.append(n);}
+  if(hiddenLarge||showAllModels){
+    const b=document.createElement("button");b.className="btn tiny ghost";b.style.margin="8px 0";
+    b.textContent=showAllModels?"HIDE LARGER MODELS":"SHOW "+hiddenLarge+" LARGER MODELS (may crash iPhone)";
+    b.onclick=()=>{showAllModels=!showAllModels;renderModels();};
+    root.append(b);
+  }
+  $("modelCount").textContent=catalog.length?shown+" shown · "+catalog.length+" in catalog":"Catalog unavailable";
+  if(!catalog.length){
+    const note=document.createElement("div");note.className="info";
+    note.textContent="The WebLLM catalog is empty. Check the network connection and package import.";
+    root.append(note);
+  }
+  root.scrollTop=prevScroll;
+  updateControls();
+}
+function updateControls(){
+  const ready=[...models.values()].filter(m=>m.status==="ready");
+  const selected=ready.filter(m=>m.selected);
+  $("activeWorkers").textContent=ready.length+" loaded · "+selected.length+" selected";
+  const active=selectedModels()[0];
+  const modelButton=$("modelsButton");
+  if(modelButton)modelButton.textContent=active?active.spec.title:"MODEL · SELECT";
+  window.__KIMCHI_ACTIVE_MODEL__=active?.entry?.modelId||"";
+  window.__KIMCHI_UPDATE_LOCKSCREEN__?.();
+  const mode=$("mode").value;
+  $("metricMode").textContent=mode.toUpperCase();
+  const needed=mode==="single"?1:2;
+  $("send").disabled=busy||selected.length<needed;
+  $("stop").disabled=!busy;
+  $("mode").disabled=busy;
+  renderModelRefreshOnly();
+}
+let refreshLock=false;
+function renderModelRefreshOnly(){
+  if(refreshLock)return;
+  refreshLock=true;
+  requestAnimationFrame(()=>{refreshLock=false;});
+}
+
+async function probeIndexedDB(){
+  if(typeof indexedDB==="undefined")return false;
+  try{
+    return await withTimeout(new Promise(resolve=>{
+      let request;
+      try{request=indexedDB.open("kimchi-storage-probe-v1");}
+      catch(_){resolve(false);return;}
+      request.onsuccess=()=>{try{request.result.close()}catch{}resolve(true)};
+      request.onerror=()=>resolve(false);
+      request.onblocked=()=>resolve(false);
+    }),"IndexedDB availability test",5000);
+  }catch(_){return false;}
+}
+
+async function loadModel(spec,record){
+  if(!gpuAdapter&&navigator.gpu)await probeGPU(true);
+  if(!navigator.gpu || !gpuAdapter){toast("WebGPU is not ready in this browser or app web view. Open Diagnostics for the adapter result.");return;}
+  if(!webllm){toast("WebLLM is not initialized yet.");return;}
+  // Run the engine in the page context. Blob-backed module workers can
+  // crash or navigate some iOS HTML viewers to about:blank.
+  lastModelAttempt={
+    model_id:record.model_id,
+    vram_required_MB:record.vram_required_MB??null,
+    low_resource_required:record.low_resource_required??null,
+    required_features:record.required_features||[],
+    model_lib:record.model_lib||null
+  };
+  if(window.__KIMCHI_LOG_BUF__)window.__KIMCHI_LOG_BUF__.length=0;
+  const entry={status:"loading",progress:0,detail:"Preparing iPhone GPU…",
+    selected:false,engine:null,worker:null,workerURL:null,modelId:record.model_id};
+  models.set(spec.key,entry);renderModels();
+  // Live wallpaper/video and glass filters compete with WebGPU memory on iPhone.
+  // Suspend them for model compilation, then restore the previous playback state.
+  const wallpaperVideo=$("wallpaperVideo"), wallpaperLayer=$("wallpaperLayer");
+  const wallpaperWasPlaying=!!(wallpaperVideo && !wallpaperVideo.paused && !wallpaperVideo.ended);
+  const oldWallpaperVisibility=wallpaperLayer?.style.visibility||"";
+  document.documentElement.classList.add("model-loading");
+  if(wallpaperVideo)wallpaperVideo.pause();
+  if(wallpaperLayer)wallpaperLayer.style.visibility="hidden";
+  try{
+    // Re-apply immediately before model initialization in case the viewer/runtime replaced console.
+    const consoleGuardOK = window.__KIMCHI_INSTALL_CONSOLE_GUARD__?.() === true;
+    lastModelAttempt.console_guard_before_load = consoleGuardOK;
+    if(!consoleGuardOK) throw new Error("Console compatibility guard failed immediately before CreateMLCEngine().");
+    try{webllm.setLogLevel?.("DEBUG")}catch{}
+    // iOS HTML viewers may expose WebGPU while omitting the CacheStorage
+    // global. WebLLM defaults to Cache API and throws "Can't find variable: caches".
+    // Use its documented IndexedDB backend while preserving the prebuilt catalog.
+    if(!webllm?.prebuiltAppConfig) throw new Error("WebLLM prebuiltAppConfig is unavailable; cannot configure IndexedDB model storage.");
+    const requiredFeatures=record.required_features||[];
+    const availableFeatures=gpuAdapter?[...gpuAdapter.features]:[];
+    const missingFeatures=requiredFeatures.filter(feature=>!availableFeatures.includes(feature));
+    lastModelAttempt.required_features=requiredFeatures;
+    lastModelAttempt.available_gpu_features=availableFeatures;
+    if(missingFeatures.length){
+      throw new Error("This model requires GPU feature(s) not exposed by the active iPhone adapter: "+missingFeatures.join(", ")+
+        ". Kimchi will not silently switch to a heavier q4f32 model.");
+    }
+    const indexedDBUsable=await probeIndexedDB();
+    const cacheStorageUsable=(typeof caches!=="undefined" && !!caches && typeof caches.open==="function");
+    const cacheBackend=indexedDBUsable?"indexeddb":(cacheStorageUsable?"cache":null);
+    lastModelAttempt.indexeddb_available=(typeof indexedDB!=="undefined");
+    lastModelAttempt.indexeddb_open_test=indexedDBUsable;
+    lastModelAttempt.cache_storage_available=cacheStorageUsable;
+    if(!cacheBackend)throw new Error("No usable WebLLM cache backend: IndexedDB open test failed and CacheStorage is unavailable. Open this HTML in Safari or a viewer that grants persistent storage.");
+    const appConfig={...webllm.prebuiltAppConfig,cacheBackend};
+    lastModelAttempt.cache_backend=cacheBackend;
+    lastModelAttempt.context_window_size=1024;
+    entry.detail="Loading model weights and compiling GPU kernels…";
+    renderModels();
+    // In WebLLM 0.2.89 the third CreateMLCEngine argument is ChatOptions.
+    // This is the supported way to cap the context/KV cache; ModelRecord.overrides
+    // is not a reliable substitute for a per-load context override.
+    const chatOpts={context_window_size:1024};
+    const engine=await webllm.CreateMLCEngine(record.model_id,{
+      appConfig,
+      initProgressCallback:report=>{
+        entry.progress=Math.round((report.progress||0)*100);
+        entry.detail=report.text||"Loading model…";
+        const now=performance.now();
+        if(now-(entry.lastRender||0)>250||entry.progress>=100){entry.lastRender=now;renderModels();}
+      }
+    },chatOpts);
+    if(models.get(spec.key)!==entry){
+      try{await engine.unload()}catch{}
+      return;
+    }
+    entry.engine=engine;entry.status="ready";entry.progress=100;
+    entry.selected=true;
+    entry.detail="Ready · selected";
+    $("systemStatus").textContent="MODEL ONLINE";
+    lastModelAttempt={model_id:record.model_id,status:"loaded",vram_required_MB:record.vram_required_MB??null,required_features:record.required_features||[],cache_backend:cacheBackend,context_window_size:1024};
+    window.__KIMCHI_ACTIVE_MODEL__=record.model_id;
+    updateLockscreen();
+    setDiagnostic("Model loaded successfully: "+record.model_id+". Inference is ready. Cache backend: "+cacheBackend+". Context window: 1024 tokens.");
+    renderModels();toast(spec.title+" loaded successfully and selected.");
+  }catch(error){
+    if(models.get(spec.key)===entry)models.delete(spec.key);
+    setDiagnostic([
+      "MODEL LOAD FAILED ["+spec.title+"]",
+      "Model ID: "+record.model_id,
+      "VRAM required (MB): "+(record.vram_required_MB??"not specified by catalog"),
+      "Low-resource model: "+(record.low_resource_required??"not specified by catalog"),
+      "Required GPU features: "+((record.required_features||[]).join(", ")||"none listed"),
+      "Cache backend: "+(lastModelAttempt?.cache_backend||"not configured"),
+      "CacheStorage available: "+(typeof caches!=="undefined"),
+      "IndexedDB available: "+(typeof indexedDB!=="undefined"),
+      "GPU adapter features: "+(gpuAdapter?[...gpuAdapter.features].join(", "):"not captured"),
+      (error?.name==="ExitStatus"||/Program terminated with exit\(1\)/.test(error?.message||""))
+        ? "WASM EXIT DIAGNOSIS: WebLLM's WASM runtime aborted. The generic ExitStatus does not identify a single cause; on iPhone the leading checks are WebGPU device loss/OOM, shader compilation failure, or a damaged/incompatible model artifact. Wallpaper and blur were suspended during this attempt; context was capped at 1024 tokens."
+        : "",
+      "Stage reached: "+(entry.detail||"unknown")+" ("+(entry.progress||0)+"%)",
+      "Runtime/GPU log before failure:\n"+((window.__KIMCHI_LOG_BUF__||[]).slice(-30).join("\n")||"(nothing captured)"),
+      friendlyHint(error)?"LIKELY CAUSE: "+friendlyHint(error):"",
+      describeError(error)
+    ].filter(Boolean).join("\n"));
+    renderModels();
+    toast("Could not load "+spec.title+". "+(friendlyHint(error)||String(error).slice(0,160)));
+  }finally{
+    document.documentElement.classList.remove("model-loading");
+    if(wallpaperLayer)wallpaperLayer.style.visibility=oldWallpaperVisibility;
+    if(wallpaperWasPlaying&&!document.hidden&&!busy&&wallpaperVideo){wallpaperVideo.play().catch(()=>{});}
+  }
+}
+async function unloadModel(key){
+  const entry=models.get(key);if(!entry||entry.status==="loading")return;
+  models.delete(key);renderModels();
+  try{await entry.engine?.unload()}catch{}
+  toast("Model unloaded.");
+  if(![...models.values()].some(x=>x.status==="ready"))$("systemStatus").textContent=idleStatus();
+  updateControls();updateLockscreen();renderModels();
+}
+async function unloadAll(){
+  if(busy){toast("Stop generation before unloading models.");return;}
+  const entries=[...models.values()];models.clear();renderModels();
+  for(const e of entries){
+    try{await e.engine?.unload()}catch{}
+  }
+  $("systemStatus").textContent=idleStatus();
+  window.__KIMCHI_ACTIVE_MODEL__="";updateLockscreen();
+  setDiagnostic("All model workers unloaded. WebGPU and WebLLM remain initialized.");
+  renderModels();toast("All model workers unloaded.");
+}
+function selectedModels(){
+  return [...SPECS,...extraSpecs].map(s=>({spec:s,entry:models.get(s.key)}))
+    .filter(x=>x.entry?.status==="ready"&&x.entry.selected);
+}
+function getContext(){
+  // Context is capped at 1024 tokens (256 reserved for the reply); keep the newest turns that fit.
+  const all=currentSession.messages.map(m=>({role:m.role,content:m.content}));
+  const out=[];let used=0;
+  for(let i=all.length-1;i>=0;i--){
+    const cost=all[i].content.length;
+    if(out.length&&used+cost>2000)break;
+    out.unshift(all[i]);used+=cost;
+  }
+  while(out.length>1&&out[0].role!=="user")out.shift();
+  return out;
+}
+// Use the model's catalog-provided conversation template without injecting a
+// generic system message. This is important for small instruct models such as
+// SmolLM2, whose native template is selected by WebLLM's ModelRecord.
+async function generateOne(item,messages,onText){
+  const {engine}=item.entry;
+  const started=performance.now();
+  const request={
+    messages:messages.map(m=>({role:m.role,content:m.content})),
+    stream:true,
+    stream_options:{include_usage:true},
+    temperature:0.8,
+    top_p:0.9,
+    max_tokens:256,
+    frequency_penalty:0.15
+  };
+  lastInference={
+    model_id:item.entry.modelId,
+    started_at:new Date().toISOString(),
+    stream:true,
+    request_messages:request.messages.length,
+    status:"requesting"
+  };
+  setDiagnostic("Streaming from "+item.entry.modelId+" using WebLLM's built-in chat template…");
+  let answer="";
+  const stream=await engine.chat.completions.create(request);
+  if(!stream || typeof stream[Symbol.asyncIterator]!=="function"){
+    throw new Error("WebLLM did not return an async response stream.");
+  }
+  let finishReason=null;
+  let usage=null;
+  for await(const chunk of stream){
+    if(abortRequested){
+      try{engine.interruptGenerate()}catch{}
+      break;
+    }
+    const choice=chunk?.choices?.[0];
+    if(choice?.finish_reason)finishReason=choice.finish_reason;
+    if(chunk?.usage)usage=chunk.usage;
+    let delta=choice?.delta?.content??"";
+    if(Array.isArray(delta))delta=delta.map(part=>part?.text||part?.content||"").join("");
+    if(typeof delta!=="string")delta=String(delta??"");
+    if(delta){
+      answer+=delta;
+      onText(answer);
+    }
+  }
+  answer=answer.trim();
+  const latestUser=[...messages].reverse().find(m=>m.role==="user")?.content?.trim()||"";
+  const exactEcho=!!answer&&!!latestUser&&answer.localeCompare(latestUser,undefined,{sensitivity:"accent"})===0;
+  lastInference={
+    model_id:item.entry.modelId,
+    elapsed_ms:Math.round(performance.now()-started),
+    stream:true,
+    finish_reason:finishReason,
+    prompt_tokens:usage?.prompt_tokens??null,
+    completion_tokens:usage?.completion_tokens??null,
+    response_chars:answer.length,
+    exact_prompt_echo:exactEcho,
+    status:abortRequested?"stopped":(exactEcho?"rejected-echo":(answer?"complete":"empty"))
+  };
+  if(abortRequested)return answer;
+  if(exactEcho){
+    setDiagnostic("MODEL ECHO DETECTED: WebLLM returned the latest user message verbatim. "+JSON.stringify(lastInference));
+    throw new Error("The model returned your prompt verbatim. Kimchi rejected the echo.");
+  }
+  if(!answer){
+    setDiagnostic("EMPTY MODEL COMPLETION: "+JSON.stringify(lastInference));
+    throw new Error("The model completed without assistant text. See Diagnostics.");
+  }
+  return answer;
+}
+async function sendMessage(){
+  let text=$("prompt").value.trim();
+  if(!text&&attachments.some(a=>a.kind==="text"))text="Summarize the attached file.";
+  if(!text||busy)return;
+  const mode=$("mode").value;const chosen=selectedModels();
+  const required=mode==="single"?1:2;
+  if(chosen.length<required){toast("Select and load "+required+" model(s) first.");return;}
+  busy=true;abortRequested=false;startedAt=performance.now();
+  pauseWallpaperForGeneration(true);
+  generatedWords=0;$("prompt").disabled=true;$("send").textContent="RUNNING";
+  $("send").disabled=true;updateControls();
+  $("prompt").value="";
+  const sent=consumeAttachments(text);
+  currentSession.messages.push({role:"user",content:sent.model,display:sent.display});
+  addMessage("user",sent.display);saveCurrent();
+  const base=getContext();
+  try{
+    if(mode==="single"){
+      const item=chosen[0];const body=addMessage("assistant","",item.spec.title);
+      const start=performance.now();
+      const answer=await generateOne(item,base,value=>{
+        body.textContent=value;generatedWords=value.trim().split(/\s+/).filter(Boolean).length;
+        $("metricSpeed").textContent=(generatedWords/Math.max(.1,(performance.now()-start)/1000)).toFixed(1);
+        $("chat").scrollTop=$("chat").scrollHeight;
+      });
+      if(answer)currentSession.messages.push({role:"assistant",content:answer+(abortRequested?"\n\n[Generation stopped]":""),model:item.spec.title});
+      else if(!abortRequested){body.textContent="The model returned an empty response. Try a shorter prompt or reload the model.";setDiagnostic("Inference completed without text output for "+item.entry.modelId+".");}
+    }
+    if(mode==="parallel"){
+      const outputs=await Promise.all(chosen.map(async item=>{
+        const body=addMessage("assistant","",item.spec.title);
+        const start=performance.now();let words=0;
+        const answer=await generateOne(item,base,value=>{
+          body.textContent=value;
+          words=value.trim().split(/\s+/).filter(Boolean).length;
+          $("metricSpeed").textContent=(words/Math.max(.1,(performance.now()-start)/1000)).toFixed(1);
+          $("chat").scrollTop=$("chat").scrollHeight;
+        });
+        return {answer,model:item.spec.title};
+      }));
+      for(const out of outputs){
+        if(out.answer)currentSession.messages.push({
+          role:"assistant",content:out.answer,model:out.model
+        });
+      }
+    }
+    if(mode==="chain"){
+      const first=chosen[0],second=chosen[1];
+      const firstBody=addMessage("assistant","",first.spec.title+" · STEP 1");
+      const firstAnswer=await generateOne(first,base,value=>{
+        firstBody.textContent=value;$("chat").scrollTop=$("chat").scrollHeight;
+      });
+      if(firstAnswer)currentSession.messages.push({
+        role:"assistant",content:firstAnswer,model:first.spec.title
+      });
+      if(!abortRequested&&firstAnswer){
+        const secondBody=addMessage("assistant","",second.spec.title+" · STEP 2");
+        const chainContext=[
+          ...base,
+          {role:"assistant",content:firstAnswer},
+          {role:"user",content:"Continue from the previous model's response. Improve it, verify its reasoning, and provide the final answer."}
+        ];
+        const secondAnswer=await generateOne(second,chainContext,value=>{
+          secondBody.textContent=value;$("chat").scrollTop=$("chat").scrollHeight;
+        });
+        if(secondAnswer)currentSession.messages.push({
+          role:"assistant",content:secondAnswer,model:second.spec.title
+        });
+      }
+    }
+  }catch(error){
+    addMessage("assistant","Generation error: "+String(error)+(friendlyHint(error)?"\n\n"+friendlyHint(error):""),"KIMCHI ERROR");
+    toast("Generation failed. Check the browser console and model status.");
+  }finally{
+    busy=false;pauseWallpaperForGeneration(false);$("prompt").disabled=false;$("send").textContent="SEND ↗";
+    $("metricTime").textContent=((performance.now()-startedAt)/1000).toFixed(1)+"s";
+    $("metricSpeed").textContent=abortRequested?"Stopped":$("metricSpeed").textContent;
+    saveCurrent();renderModels();updateControls();
+    $("prompt").focus();
+  }
+}
+function stopGeneration(){
+  if(!busy)return;
+  abortRequested=true;
+  for(const entry of models.values()){
+    if(entry.status==="ready")entry.engine?.interruptGenerate();
+  }
+  $("stop").disabled=true;toast("Stop requested for all active workers.");
+}
+
+// Wallpaper state: direct URLs persist; imported local files last for this viewer session.
+const WALLPAPER_KEY="kimchi.wallpaper.v1";
+let localWallpaperObjectURL=null;
+function setWallpaperSource(url,type,label,persist=true){
+  const video=$("wallpaperVideo"),img=$("wallpaperImage");
+  video.pause();video.removeAttribute("src");video.load();img.removeAttribute("src");
+  if(type==="video"){
+    video.style.display="block";img.style.display="none";video.src=url;
+    video.play().then(()=>{}).catch(()=>{$("wallpaperStatus").textContent="Wallpaper set. Tap the page once if iOS blocks autoplay.";});
+  }else{
+    img.style.display="block";video.style.display="none";img.src=url;
+  }
+  $("wallpaperStatus").textContent=label||"Wallpaper applied.";
+  document.body.classList.add("has-wallpaper");
+  if(persist){try{localStorage.setItem(WALLPAPER_KEY,JSON.stringify({url,type,label}))}catch{}}
+}
+function clearWallpaper(){
+  $("wallpaperVideo").pause();$("wallpaperVideo").removeAttribute("src");$("wallpaperVideo").load();
+  $("wallpaperImage").removeAttribute("src");$("wallpaperImage").style.display="none";$("wallpaperVideo").style.display="none";
+  try{localStorage.removeItem(WALLPAPER_KEY)}catch{}
+  if(localWallpaperObjectURL){URL.revokeObjectURL(localWallpaperObjectURL);localWallpaperObjectURL=null}
+  $("wallpaperStatus").textContent="No wallpaper selected.";
+  document.body.classList.remove("has-wallpaper");
+}
+function restoreWallpaper(){
+  try{const saved=JSON.parse(localStorage.getItem(WALLPAPER_KEY)||"null");if(saved?.url&&saved?.type)setWallpaperSource(saved.url,saved.type,saved.label||"Restored wallpaper",false)}catch{}
+  let dim=46;try{dim=Number(localStorage.getItem("kimchi.wallpaper.dim")||46)}catch{}
+  $("wallpaperDim").value=String(dim);$("wallpaperDimValue").textContent=dim+"%";
+  $("wallpaperScrim").style.background=`rgba(10,12,18,${dim/100})`;
+}
+function pauseWallpaperForGeneration(pause){
+  const video=$("wallpaperVideo");
+  if(!video.src)return;
+  if(pause&&$("pauseOnGenerate").checked)video.pause();
+  else if(!document.hidden)video.play().catch(()=>{});
+}
+$("applyWallpaper").addEventListener("click",()=>{
+  const url=$("wallpaperUrl").value.trim();if(!url){toast("Paste a direct media URL first.");return}
+  if(!/^https?:\/\//i.test(url)){toast("Use a direct HTTPS or HTTP media URL.");return}
+  const path=url.split("?")[0].toLowerCase();const type=/\.(mp4|webm|mov|m4v)$/.test(path)?"video":"image";
+  setWallpaperSource(url,type,"Applied remote "+type+" wallpaper");
+});
+$("wallpaperFile").addEventListener("change",event=>{
+  const file=event.target.files?.[0];if(!file)return;
+  if(!file.type.startsWith("video/")&&!file.type.startsWith("image/")){toast("Choose a video or image file.");return}
+  if(localWallpaperObjectURL)URL.revokeObjectURL(localWallpaperObjectURL);
+  localWallpaperObjectURL=URL.createObjectURL(file);
+  setWallpaperSource(localWallpaperObjectURL,file.type.startsWith("video/")?"video":"image",file.name,false);
+  try{localStorage.removeItem(WALLPAPER_KEY)}catch{}
+});
+$("clearWallpaper").addEventListener("click",clearWallpaper);
+$("wallpaperDim").addEventListener("input",event=>{
+  const value=Number(event.target.value);$("wallpaperDimValue").textContent=value+"%";
+  $("wallpaperScrim").style.background=`rgba(10,12,18,${value/100})`;
+  try{localStorage.setItem("kimchi.wallpaper.dim",String(value))}catch{}
+});
+function updateLockscreen(){
+  const active=[...models.values()].find(m=>m.status==="ready"&&m.selected);
+  window.__KIMCHI_ACTIVE_MODEL__=active?.modelId||"";
+  window.__KIMCHI_UPDATE_LOCKSCREEN__?.();
+}
+document.addEventListener("visibilitychange",()=>{
+  const video=$("wallpaperVideo");if(document.hidden)video.pause();else if(!busy&&video.src)video.play().catch(()=>{});
+});
+restoreWallpaper();updateLockscreen();
+
+// ---- Attachments: text files are inlined into the prompt (trimmed to fit the 1024-token window); photos are listed only, since the loaded models are text-only.
+let attachments=[];
+const FILE_CHAR_BUDGET=1500;
+const TEXT_EXT=/\.(txt|md|markdown|csv|tsv|json|js|ts|jsx|tsx|py|html|css|xml|ya?ml|log|ini|toml|sh|c|cpp|h|java|rb|go|rs|sql)$/i;
+function renderAttachments(){
+  const tray=$("attachTray");tray.replaceChildren();
+  tray.classList.toggle("has",attachments.length>0);
+  attachments.forEach((a,i)=>{
+    const chip=document.createElement("div");chip.className="chip";
+    if(a.kind==="image"){const im=document.createElement("img");im.src=a.url;im.alt="";chip.append(im);}
+    else chip.append(document.createTextNode("📄"));
+    const nm=document.createElement("span");nm.textContent=a.name;chip.append(nm);
+    const x=document.createElement("button");x.type="button";x.textContent="×";x.setAttribute("aria-label","Remove "+a.name);
+    x.onclick=()=>{if(a.url)URL.revokeObjectURL(a.url);attachments.splice(i,1);renderAttachments();};
+    chip.append(x);tray.append(chip);
+  });
+}
+$("attach").addEventListener("click",()=>$("attachInput").click());
+$("attachInput").addEventListener("change",async event=>{
+  const files=[...(event.target.files||[])];event.target.value="";
+  for(const file of files){
+    if(attachments.length>=4){toast("Up to 4 attachments per message.");break;}
+    if(file.type.startsWith("image/")){
+      attachments.push({kind:"image",name:file.name||"photo",url:URL.createObjectURL(file)});
+      toast("Photo added. The loaded models are text-only and can't see images.");
+    }else if(file.type.startsWith("text/")||file.type==="application/json"||TEXT_EXT.test(file.name||"")){
+      if(file.size>2e6){toast(file.name+" is too large (2 MB max).");continue;}
+      try{attachments.push({kind:"text",name:file.name,text:await file.text()});}
+      catch(e){toast("Could not read "+file.name+".");}
+    }else toast((file.name||"File")+": only photos and plain-text/code files are supported (no PDF or Word).");
+  }
+  renderAttachments();
+});
+function consumeAttachments(text){
+  let budget=FILE_CHAR_BUDGET,model="";const notes=[];
+  for(const a of attachments){
+    if(a.kind==="image"){
+      model+='[The user attached a photo named "'+a.name+'". You cannot see images, so do not describe it.]\n\n';
+      notes.push(a.name+" (photo, not readable by this model)");
+      URL.revokeObjectURL(a.url);
+    }else{
+      const body=a.text.slice(0,Math.max(0,budget));const cut=body.length<a.text.length;
+      budget-=body.length;
+      model+='File "'+a.name+'"'+(cut?" (trimmed)":"")+':\n"""\n'+body+'\n"""\n\n';
+      notes.push(a.name+(cut?" (trimmed)":""));
+      if(cut)toast("File trimmed to fit the 1024-token context window.");
+    }
+  }
+  attachments=[];renderAttachments();
+  return {model:model+text,display:text+(notes.length?"\n\n📎 "+notes.join(", "):"")};
+}
+
+$("send").addEventListener("click",sendMessage);
+$("stop").addEventListener("click",stopGeneration);
+$("newChat").addEventListener("click",newChat);
+$("clearChat").addEventListener("click",()=>{
+  sessions=sessions.filter(s=>s.id!==currentSession.id);
+  saveSessions();renderHistory();
+  currentSession=newSession();
+  renderMessages();
+  toast("Current conversation cleared from local history.");
+});
+$("copyDiagnostics").addEventListener("click",async()=>{
+  const report=diagnosticReport();
+  try{await navigator.clipboard.writeText(report);toast("Diagnostics copied.");}
+  catch{setDiagnostic(report);toast("Clipboard unavailable. Diagnostics are displayed above.");}
+});
+$("unloadAll").addEventListener("click",unloadAll);
+$("mode").addEventListener("change",updateControls);
+$("prompt").addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&!e.shiftKey){
+    e.preventDefault();if(!$("send").disabled)sendMessage();
+  }
+});
+
+async function initialize(){
+  let finalState="ERROR";
+  let finalMessage="Initialization did not complete.";
+  $("systemStatus").textContent="INITIALIZING";
+  $("modelCount").textContent="Loading WebLLM…";
+  logMilestone("Kimchi startup sequence entered.");
+  logMilestone("Environment: secureContext="+!!window.isSecureContext+
+    ", online="+!!navigator.onLine+
+    ", navigator.gpu="+!!(navigator.gpu)+
+    ", IndexedDB="+(typeof indexedDB!=="undefined")+
+    ", CacheStorage="+(typeof caches!=="undefined")+".");
+  try{
+    if(!window.isSecureContext){
+      logMilestone("WARNING: This page is not in a secure context. WebGPU generally requires HTTPS or a trusted app origin.");
+    }
+    if(!navigator.onLine){
+      logMilestone("WARNING: Network is offline. Runtime import and uncached assets may fail.");
+    }
+
+    // Load the JavaScript runtime and model registry FIRST. A GPU adapter
+    // failure must not prevent the UI from displaying the actual catalog.
+    logMilestone("Importing WebLLM "+WEBLLM_VERSION+"…");
+    window.__KIMCHI_CONSOLE_GUARD__=window.__KIMCHI_INSTALL_CONSOLE_GUARD__?.()||false;
+    try{
+      webllm=await withTimeout(import(WEBLLM_URL),"WebLLM esm.run import",45000);
+    }catch(primaryError){
+      logMilestone("esm.run failed: "+describeError(primaryError));
+      const fallbackURL=`https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@${WEBLLM_VERSION}/+esm`;
+      logMilestone("Trying jsDelivr fallback…");
+      webllm=await withTimeout(import(fallbackURL),"WebLLM jsDelivr import",45000);
+    }
+    window.__KIMCHI_CONSOLE_GUARD__=window.__KIMCHI_INSTALL_CONSOLE_GUARD__?.()||false;
+    if(typeof webllm?.CreateMLCEngine!=="function"){
+      throw new Error("WebLLM imported, but CreateMLCEngine() is missing. The CDN returned an incompatible module.");
+    }
+    catalog=webllm?.prebuiltAppConfig?.model_list||[];
+    if(!Array.isArray(catalog))throw new Error("WebLLM prebuiltAppConfig.model_list is not an array.");
+    logMilestone("WebLLM imported. Actual built-in catalog contains "+catalog.length+" models.");
+
+    extraSpecs=buildExtraSpecs();
+    renderModels();
+    renderHistory();
+    renderMessages();
+
+    // Probe WebGPU independently; cards show "CHECKING GPU…" until it settles.
+    await probeGPU();
+    // Refresh model cards after the asynchronous GPU probe completes.
+    renderModels();
+    updateControls();
+
+    if(!catalog.length){
+      finalState="ERROR";
+      finalMessage="WebLLM imported, but its prebuilt model catalog is empty.";
+    }else if(!gpuAdapter){
+      finalState="RUNTIME READY · GPU OFFLINE";
+      finalMessage="WebLLM and the model registry loaded ("+catalog.length+" models), but this app/browser has not provided a usable WebGPU adapter. Inference cannot start until WebGPU is available.";
+    }else{
+      finalState="READY · LOAD MODEL";
+      finalMessage="WebLLM "+WEBLLM_VERSION+" initialized. "+catalog.length+
+        " built-in catalog models detected. WebGPU adapter ready; load a compatible small model to begin.";
+    }
+    logMilestone(finalMessage);
+  }catch(error){
+    finalState="ERROR";
+    finalMessage="Initialization failed: "+describeError(error);
+    $("gpuInfo").textContent="Runtime initialization failed. See diagnostics.";
+    if(!catalog.length && webllm?.prebuiltAppConfig?.model_list){
+      catalog=webllm.prebuiltAppConfig.model_list;
+      extraSpecs=buildExtraSpecs();
+    }
+    if(gpuState==="probing")gpuState="unavailable";
+    renderModels();
+    renderHistory();
+    logMilestone(finalMessage);
+    toast("Kimchi startup failed. Open Diagnostics for the exact error.");
+  }finally{
+    $("systemStatus").textContent=finalState;
+    if(!catalog.length)$("modelCount").textContent="Catalog unavailable";
+    setDiagnostic(lastDiagnostic+"\nFINAL STATUS: "+finalState+" — "+finalMessage);
+  }
+}
+window.addEventListener("unhandledrejection",event=>{
+  setDiagnostic(lastDiagnostic+"\nGLOBAL unhandledrejection: "+(event.reason?.stack||event.reason));
+});
+window.addEventListener("error",event=>{
+  setDiagnostic(lastDiagnostic+"\nGLOBAL window.error: "+(event.message||"Unknown error")+" ("+(event.filename||"unknown file")+":"+(event.lineno||0)+")");
+});
+window.addEventListener("offline",()=>setDiagnostic("Network disconnected. New model downloads and package requests will fail; a previously cached model may still run."));
+window.addEventListener("online",()=>setDiagnostic("Network restored. WebLLM can download uncached model files."));
+initialize();
+</script>
+</body>
+</html>
+	
